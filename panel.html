@@ -188,8 +188,18 @@
 
   // ---------- LOGIN ----------
   async function checkSession(){
-    const { data: { session } } = await window.sb.auth.getSession();
-    if(session){ mostrarApp(session); } else { mostrarLogin(); }
+    if(typeof window.sb === 'undefined'){
+      mostrarLogin();
+      document.getElementById('loginMsg').textContent = 'Error de configuración: revisa js/supabaseClient.js (URL/key mal pegadas).';
+      return;
+    }
+    try{
+      const { data: { session } } = await window.sb.auth.getSession();
+      if(session){ mostrarApp(session); } else { mostrarLogin(); }
+    }catch(err){
+      mostrarLogin();
+      document.getElementById('loginMsg').textContent = 'Error de conexión con Supabase: ' + (err.message || err);
+    }
   }
   function mostrarLogin(){
     document.getElementById('loginGate').style.display = 'flex';
@@ -207,15 +217,32 @@
     const btn = document.getElementById('loginBtn');
     const msg = document.getElementById('loginMsg');
     btn.disabled = true; btn.textContent = 'Entrando…'; msg.textContent = '';
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const { data, error } = await window.sb.auth.signInWithPassword({ email, password });
-    btn.disabled = false; btn.textContent = 'Entrar';
-    if(error){
-      msg.textContent = 'Correo o contraseña incorrectos.';
+
+    if(typeof window.sb === 'undefined'){
+      msg.textContent = 'Error de configuración: revisa js/supabaseClient.js (URL/key mal pegadas).';
+      btn.disabled = false; btn.textContent = 'Entrar';
       return;
     }
-    mostrarApp(data.session);
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try{
+      const { data, error } = await window.sb.auth.signInWithPassword({ email, password });
+      btn.disabled = false; btn.textContent = 'Entrar';
+      if(error){
+        if(error.message.toLowerCase().includes('email not confirmed')){
+          msg.textContent = 'Tu usuario no está confirmado. En Supabase: Authentication → Users → click en tu usuario → Confirm email.';
+        }else{
+          msg.textContent = 'No se pudo entrar: ' + error.message;
+        }
+        return;
+      }
+      mostrarApp(data.session);
+    }catch(err){
+      btn.disabled = false; btn.textContent = 'Entrar';
+      msg.textContent = 'Error de conexión con Supabase: ' + (err.message || err);
+    }
   });
 
   document.getElementById('logoutBtn').addEventListener('click', async ()=>{
