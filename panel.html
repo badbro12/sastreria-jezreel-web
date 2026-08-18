@@ -67,6 +67,11 @@
   .filters{ display:flex; gap:.5rem; }
   .filters button{ font-family:var(--mono); font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; padding:.4rem .8rem; border:1px solid #cfc7b5; background:#fff; border-radius:20px; cursor:pointer; }
   .filters button.active{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
+  .search-input{
+    width:100%; padding:.65rem .8rem; margin-bottom:1rem; border:1px solid #cfc7b5; border-radius:6px;
+    font-family:var(--sans); font-size:.88rem; background:#fff;
+  }
+  .search-input:focus{ outline:2px solid var(--ice-dim); border-color:var(--steel); }
 
   .client{
     background:#fff; border:1px solid #ddd6c9; border-left:5px solid var(--ok); border-radius:6px;
@@ -173,8 +178,10 @@
           <button class="active" data-f="todos">Todos</button>
           <button data-f="urgente">Urgentes</button>
           <button data-f="proximo">Próximos</button>
+          <button data-f="historial">Historial</button>
         </div>
       </div>
+      <input type="text" id="buscador" placeholder="Buscar cliente por nombre…" class="search-input">
       <div id="clientList"><div class="empty">Cargando pedidos…</div></div>
     </div>
   </div>
@@ -185,6 +192,7 @@
 <script>
   let clientes = [];
   let filtro = 'todos';
+  let busqueda = '';
 
   // ---------- LOGIN ----------
   async function checkSession(){
@@ -278,34 +286,50 @@
   function render(){
     const list = document.getElementById('clientList');
     let items = [...clientes];
-    if(filtro !== 'todos') items = items.filter(c => estadoCliente(c) === filtro);
+
+    if(filtro === 'historial'){
+      items = items.filter(c => c.estado === 'completado');
+    }else{
+      items = items.filter(c => c.estado !== 'completado');
+      if(filtro !== 'todos') items = items.filter(c => estadoCliente(c) === filtro);
+    }
+
+    if(busqueda.trim()){
+      const q = busqueda.trim().toLowerCase();
+      items = items.filter(c => c.nombre.toLowerCase().includes(q));
+    }
+
+    items.sort((a,b)=> new Date(a.fecha) - new Date(b.fecha));
 
     if(items.length === 0){
-      list.innerHTML = '<div class="empty">Sin pedidos en esta vista. Agrega un cliente desde el formulario.</div>';
+      list.innerHTML = `<div class="empty">${filtro === 'historial' ? 'Todavía no hay clientes completados.' : 'Sin pedidos en esta vista. Agrega un cliente desde el formulario.'}</div>`;
       return;
     }
 
     list.innerHTML = items.map(c => {
-      const estado = estadoCliente(c);
+      const completado = c.estado === 'completado';
+      const estado = completado ? 'ok' : estadoCliente(c);
       const dias = diasRestantes(c.fecha);
-      const badgeText = estado === 'urgente' ? 'Urgente' : `${dias} días`;
+      const badgeText = completado ? 'Completado' : (estado === 'urgente' ? 'Urgente' : `${dias} días`);
       const medidasArr = [
         ['Pecho', c.pecho], ['Cintura', c.cintura], ['Cadera', c.cadera], ['Hombro', c.hombro],
         ['Manga', c.manga], ['Pierna', c.pierna], ['Cuello', c.cuello], ['Espalda', c.espalda]
       ].filter(m => m[1] !== null && m[1] !== undefined && m[1] !== '');
       return `
-        <div class="client ${estado}">
+        <div class="client ${completado ? 'proximo' : estado}">
           <div class="client-top">
             <div>
               <h3>${escapeHtml(c.nombre)}</h3>
               <div class="meta">${escapeHtml(c.prenda)} · Entrega: ${formatFecha(c.fecha)} ${c.telefono ? '· ' + escapeHtml(c.telefono) : ''}</div>
             </div>
-            <span class="badge ${estado}">${badgeText}</span>
+            <span class="badge ${completado ? 'ok' : estado}">${badgeText}</span>
           </div>
           ${medidasArr.length ? `<div class="medidas">${medidasArr.map(m => `<span>${m[0]}: <b>${m[1]} cm</b></span>`).join('')}</div>` : ''}
           <div class="client-actions">
-            <button onclick="marcarListo('${c.id}')">Marcar listo</button>
-            <button class="del" onclick="eliminarCliente('${c.id}')">Eliminar</button>
+            ${completado
+              ? `<button onclick="reactivarCliente('${c.id}')">Reactivar</button>`
+              : `<button onclick="marcarListo('${c.id}')">Marcar listo</button>`}
+            <button class="del" onclick="eliminarCliente('${c.id}')">Eliminar definitivo</button>
           </div>
         </div>`;
     }).join('');
@@ -320,13 +344,23 @@
   }
 
   async function marcarListo(id){
-    await window.sb.from('clientes').delete().eq('id', id);
+    await window.sb.from('clientes').update({ estado: 'completado' }).eq('id', id);
+    await cargarClientes();
+  }
+  async function reactivarCliente(id){
+    await window.sb.from('clientes').update({ estado: 'activo' }).eq('id', id);
     await cargarClientes();
   }
   async function eliminarCliente(id){
+    if(!confirm('Esto borra al cliente para siempre, incluido su historial. ¿Seguro?')) return;
     await window.sb.from('clientes').delete().eq('id', id);
     await cargarClientes();
   }
+
+  document.getElementById('buscador').addEventListener('input', e=>{
+    busqueda = e.target.value;
+    render();
+  });
 
   document.getElementById('filters').addEventListener('click', e=>{
     const b = e.target.closest('button'); if(!b) return;
