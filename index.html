@@ -149,13 +149,29 @@
   /* ---------- CONFIGURADOR ---------- */
   .config{ background:var(--bone-2); color:var(--ink); }
   .config .section-head p{ color:#4a4740; }
-  .config-panel{ display:grid; grid-template-columns:1fr 1fr; gap:2.4rem; align-items:center; }
+  .config-panel{ display:grid; grid-template-columns:1fr 1fr; gap:2.4rem; align-items:start; }
   @media(max-width:820px){ .config-panel{ grid-template-columns:1fr; } }
+  .stage-wrap{ display:flex; flex-direction:column; gap:.9rem; }
+  .gender-seg{ display:flex; gap:.5rem; }
+  .gender-seg button{
+    font-family:var(--sans); font-size:.82rem; font-weight:600; padding:.6rem 1.2rem; border-radius:20px;
+    border:1px solid rgba(11,13,16,.25); background:transparent; cursor:pointer; color:var(--ink);
+  }
+  .gender-seg button.active{ background:var(--ink); color:var(--bone); border-color:var(--ink); }
+  .prenda-tabs{ display:flex; gap:.4rem; flex-wrap:wrap; }
+  .prenda-tabs button{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; padding:.5rem .9rem;
+    border-radius:4px; border:1px solid rgba(11,13,16,.2); background:#fff; cursor:pointer; color:var(--ink);
+  }
+  .prenda-tabs button.active{ background:var(--steel); color:#fff; border-color:var(--steel); }
   .stage{
     background:var(--ink); border-radius:4px; padding:2rem; display:flex; align-items:center; justify-content:center;
     min-height:340px;
   }
   #figure{ width:220px; height:340px; }
+  .resultado-summary{ display:flex; flex-direction:column; gap:.5rem; }
+  .resultado-summary .row{ display:flex; align-items:center; gap:.6rem; font-family:var(--mono); font-size:.78rem; }
+  .resultado-summary .dot{ width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.2); flex-shrink:0; }
   .controls{ display:flex; flex-direction:column; gap:1.6rem; }
   .ctrl-group label{ display:block; font-family:var(--mono); font-size:.68rem; letter-spacing:.14em; text-transform:uppercase; margin-bottom:.6rem; opacity:.7; }
   .swatches{ display:flex; gap:.6rem; flex-wrap:wrap; }
@@ -265,54 +281,80 @@
 <section class="config" id="configurador">
   <div class="section-head">
     <div class="eyebrow">Personalización</div>
-    <h2>Arma tu traje, capa por capa</h2>
-    <p>Elige la prenda, la tela y el color. Esta es una vista previa rápida — el configurador completo permite guardar tu diseño y pedirlo directo por WhatsApp.</p>
+    <h2>Elige cada prenda por separado</h2>
+    <p>Primero el saco, luego el chaleco, luego el pantalón (o falda) — cada uno en su propio maniquí para que el color se vea claro. Al final, el resultado combinado.</p>
   </div>
   <div class="config-panel">
-    <div class="stage">
-      <svg id="figure" viewBox="0 0 200 320">
-        <ellipse cx="100" cy="34" rx="22" ry="26" fill="#e8c9a3"/>
-        <path id="garment" d="M60,70 Q100,55 140,70 L152,190 Q100,205 48,190 Z" fill="#15181D" stroke="#000" stroke-width="1"/>
-        <path id="lapelL" d="M92,68 L78,120 L92,110 Z" fill="#0B0D10"/>
-        <path id="lapelR" d="M108,68 L122,120 L108,110 Z" fill="#0B0D10"/>
-        <rect id="shirt" x="93" y="70" width="14" height="55" fill="#F5F2ED"/>
-        <path id="tie" d="M98,74 L102,74 L106,118 L100,128 L94,118 Z" fill="#46697A"/>
-        <rect id="pants" x="65" y="192" width="70" height="110" fill="#1c2126"/>
-        <rect x="65" y="192" width="70" height="6" fill="#0B0D10"/>
-      </svg>
+    <div class="stage-wrap">
+      <div class="gender-seg" id="genderSeg">
+        <button class="active" data-g="hombre">Hombre</button>
+        <button data-g="mujer">Mujer</button>
+      </div>
+      <div class="prenda-tabs" id="prendaTabs"></div>
+      <div class="stage">
+        <svg id="figure" viewBox="0 0 200 340">
+          <!-- base / pedestal -->
+          <rect x="72" y="322" width="56" height="7" rx="2" fill="#8f897a"/>
+          <rect x="97" y="308" width="6" height="16" fill="#a49d8c"/>
+
+          <!-- maniquí de tela -->
+          <ellipse id="p-head" cx="100" cy="28" rx="16" ry="21" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+          <line x1="100" y1="9" x2="100" y2="47" stroke="#c9bfa6" stroke-width="1" opacity=".6"/>
+          <rect x="94" y="46" width="12" height="10" fill="#EDE6D6" stroke="#c9bfa6" stroke-width=".6"/>
+          <rect id="p-torso" x="77" y="54" width="46" height="98" rx="14" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+          <line x1="100" y1="56" x2="100" y2="150" stroke="#c9bfa6" stroke-width="1" opacity=".5"/>
+
+          <rect id="p-armL" x="58" y="58" width="15" height="52" rx="7" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+          <rect id="p-handL" x="57" y="108" width="15" height="46" rx="7" fill="#C9A06B"/>
+          <rect id="p-armR" x="127" y="58" width="15" height="52" rx="7" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+          <rect id="p-handR" x="128" y="108" width="15" height="46" rx="7" fill="#C9A06B"/>
+
+          <rect id="p-legL" x="80" y="150" width="19" height="158" rx="7" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+          <rect id="p-legR" x="101" y="150" width="19" height="158" rx="7" fill="#EDE6D6" stroke="#c9bfa6" stroke-width="1"/>
+
+          <g id="g-chaleco">
+            <path d="M83,56 Q100,49 117,56 L120,140 Q100,150 80,140 Z" fill="#2E4756"/>
+          </g>
+
+          <g id="g-saco">
+            <rect x="58" y="58" width="15" height="98" rx="7" fill="#15181D"/>
+            <rect x="127" y="58" width="15" height="98" rx="7" fill="#15181D"/>
+            <path d="M73,54 Q100,42 127,54 L136,148 Q100,164 64,148 Z" fill="#15181D" stroke="#000" stroke-width="1"/>
+            <path d="M98,52 L86,98 L98,88 Z" fill="#0B0D10"/>
+            <path d="M102,52 L114,98 L102,88 Z" fill="#0B0D10"/>
+            <rect id="chalecoPeek" x="93" y="54" width="14" height="44" fill="#F5F2ED"/>
+          </g>
+
+          <g id="g-pantalon">
+            <rect x="80" y="150" width="19" height="158" rx="7" fill="#1c2126"/>
+            <rect x="101" y="150" width="19" height="158" rx="7" fill="#1c2126"/>
+            <rect x="80" y="150" width="40" height="7" fill="#0B0D10"/>
+          </g>
+
+          <g id="g-falda">
+            <path d="M78,150 L122,150 L133,238 L67,238 Z" fill="#1c2126"/>
+            <rect x="78" y="150" width="44" height="7" fill="#0B0D10"/>
+          </g>
+        </svg>
+      </div>
     </div>
     <div class="controls">
-      <div class="ctrl-group">
-        <label>Prenda</label>
-        <div class="seg" id="prendaSeg">
-          <button class="active" data-v="saco">Saco</button>
-          <button data-v="chaleco">Chaleco</button>
-          <button data-v="falda">Falda sastre</button>
-        </div>
-      </div>
-      <div class="ctrl-group">
-        <label>Tela / color principal</label>
-        <div class="swatches" id="telaSwatch">
-          <div class="swatch active" style="background:#15181D" data-c="#15181D"></div>
+      <div class="ctrl-group" id="colorGroupWrap">
+        <label id="colorLabel">Color del saco</label>
+        <div class="swatches" id="colorSwatch">
+          <div class="swatch" style="background:#15181D" data-c="#15181D"></div>
           <div class="swatch" style="background:#2E4756" data-c="#2E4756"></div>
           <div class="swatch" style="background:#46697A" data-c="#46697A"></div>
           <div class="swatch" style="background:#4a4038" data-c="#4a4038"></div>
           <div class="swatch" style="background:#6b6b6b" data-c="#6b6b6b"></div>
           <div class="swatch" style="background:#BFE1EC" data-c="#BFE1EC"></div>
-        </div>
-      </div>
-      <div class="ctrl-group">
-        <label>Corbata / detalle</label>
-        <div class="swatches" id="corbSwatch">
-          <div class="swatch active" style="background:#46697A" data-c="#46697A"></div>
-          <div class="swatch" style="background:#A6824F" data-c="#A6824F"></div>
           <div class="swatch" style="background:#8a2e2e" data-c="#8a2e2e"></div>
-          <div class="swatch" style="background:#BFE1EC" data-c="#BFE1EC"></div>
-          <div class="swatch" style="background:#F5F2ED" data-c="#F5F2ED"></div>
+          <div class="swatch" style="background:#A6824F" data-c="#A6824F"></div>
         </div>
       </div>
+      <div class="resultado-summary" id="resultadoSummary"></div>
       <a href="#contacto" class="btn btn-primary" style="width:fit-content;">Pedir este diseño por WhatsApp</a>
-      <p class="config-note">Vista previa ilustrada. La versión con tu foto real se activa junto a la pasarela de pago del taller.</p>
+      <p class="config-note">Vista previa ilustrada por prenda. La versión con tu foto real se activa junto a la pasarela de pago del taller.</p>
     </div>
   </div>
 </section>
@@ -368,46 +410,117 @@
       <div class="foot"><span class="price">${m.precio}</span><a href="#configurador">Personalizar →</a></div>
     </div>`).join('');
 
-  // --- MINI CONFIGURADOR ---
-  const garment = document.getElementById('garment');
-  const lapelL = document.getElementById('lapelL');
-  const lapelR = document.getElementById('lapelR');
-  const pants = document.getElementById('pants');
-  const tie = document.getElementById('tie');
-  const shirt = document.getElementById('shirt');
+  // --- CONFIGURADOR POR FASES (maniquí modular) ---
+  const PRENDAS = {
+    hombre: [
+      {key:'saco', label:'Saco'},
+      {key:'chaleco', label:'Chaleco'},
+      {key:'pantalon', label:'Pantalón'},
+      {key:'resultado', label:'Resultado'},
+    ],
+    mujer: [
+      {key:'saco', label:'Saco'},
+      {key:'chaleco', label:'Chaleco'},
+      {key:'falda', label:'Falda'},
+      {key:'resultado', label:'Resultado'},
+    ]
+  };
+  const DEFAULT_COLORS = { saco:'#15181D', chaleco:'#2E4756', pantalon:'#1c2126', falda:'#1c2126' };
+  const cfgState = { gender:'hombre', activePrenda:'saco', colors: {...DEFAULT_COLORS} };
 
-  document.getElementById('telaSwatch').addEventListener('click', e=>{
-    const sw = e.target.closest('.swatch'); if(!sw) return;
-    document.querySelectorAll('#telaSwatch .swatch').forEach(s=>s.classList.remove('active'));
-    sw.classList.add('active');
-    const c = sw.dataset.c;
-    garment.setAttribute('fill', c);
-    pants.setAttribute('fill', c);
-    lapelL.setAttribute('fill', shadeColor(c));
-    lapelR.setAttribute('fill', shadeColor(c));
-  });
-  document.getElementById('corbSwatch').addEventListener('click', e=>{
-    const sw = e.target.closest('.swatch'); if(!sw) return;
-    document.querySelectorAll('#corbSwatch .swatch').forEach(s=>s.classList.remove('active'));
-    sw.classList.add('active');
-    tie.setAttribute('fill', sw.dataset.c);
-  });
-  document.getElementById('prendaSeg').addEventListener('click', e=>{
-    const b = e.target.closest('button'); if(!b) return;
-    document.querySelectorAll('#prendaSeg button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    const v = b.dataset.v;
-    if(v==='chaleco'){ garment.setAttribute('d','M65,70 Q100,60 135,70 L145,185 Q100,198 55,185 Z'); shirt.style.display='block'; tie.style.display='block'; }
-    if(v==='saco'){ garment.setAttribute('d','M60,70 Q100,55 140,70 L152,190 Q100,205 48,190 Z'); shirt.style.display='block'; tie.style.display='block'; }
-    if(v==='falda'){ pants.setAttribute('d',''); pants.setAttribute('width','80'); pants.setAttribute('x','60'); pants.setAttribute('height','80'); }
-  });
-  function shadeColor(hex){
-    let c = hex.replace('#','');
-    let r = Math.max(0, parseInt(c.substr(0,2),16)-25);
-    let g = Math.max(0, parseInt(c.substr(2,2),16)-25);
-    let b = Math.max(0, parseInt(c.substr(4,2),16)-25);
-    return `rgb(${r},${g},${b})`;
+  const els = {
+    genderSeg: document.getElementById('genderSeg'),
+    prendaTabs: document.getElementById('prendaTabs'),
+    colorSwatch: document.getElementById('colorSwatch'),
+    colorLabel: document.getElementById('colorLabel'),
+    colorGroupWrap: document.getElementById('colorGroupWrap'),
+    resultadoSummary: document.getElementById('resultadoSummary'),
+    gSaco: document.getElementById('g-saco'),
+    gChaleco: document.getElementById('g-chaleco'),
+    gPantalon: document.getElementById('g-pantalon'),
+    gFalda: document.getElementById('g-falda'),
+    chalecoPeek: document.getElementById('chalecoPeek'),
+  };
+
+  function renderPrendaTabs(){
+    const items = PRENDAS[cfgState.gender];
+    els.prendaTabs.innerHTML = items.map(p =>
+      `<button data-p="${p.key}" class="${p.key===cfgState.activePrenda?'active':''}">${p.label}</button>`
+    ).join('');
   }
+
+  function fillFor(key){ return cfgState.colors[key] || DEFAULT_COLORS[key]; }
+
+  function renderFigure(){
+    // aplica colores actuales a cada capa
+    els.gSaco.querySelectorAll('rect, path').forEach(el => {
+      const f = el.getAttribute('fill');
+      if(f === '#15181D') el.setAttribute('fill', fillFor('saco'));
+    });
+    els.gChaleco.querySelector('path').setAttribute('fill', fillFor('chaleco'));
+    els.gPantalon.querySelectorAll('rect').forEach((r,i) => { if(i<2) r.setAttribute('fill', fillFor('pantalon')); });
+    els.gFalda.querySelector('path').setAttribute('fill', fillFor('falda'));
+
+    const p = cfgState.activePrenda;
+    const show = (el, cond) => el.style.display = cond ? 'block' : 'none';
+
+    if(p === 'resultado'){
+      show(els.gSaco, true);
+      show(els.gChaleco, false);
+      show(els.gPantalon, cfgState.gender==='hombre');
+      show(els.gFalda, cfgState.gender==='mujer');
+      els.chalecoPeek.setAttribute('fill', fillFor('chaleco'));
+      els.colorGroupWrap.style.display = 'none';
+      els.resultadoSummary.style.display = 'flex';
+      const rows = [['Saco','saco'], ['Chaleco (asoma bajo el saco)','chaleco']];
+      rows.push(cfgState.gender==='hombre' ? ['Pantalón','pantalon'] : ['Falda','falda']);
+      els.resultadoSummary.innerHTML = rows.map(([label,key]) =>
+        `<div class="row"><span class="dot" style="background:${fillFor(key)}"></span>${label}</div>`
+      ).join('');
+      return;
+    }
+
+    els.colorGroupWrap.style.display = 'block';
+    els.resultadoSummary.style.display = 'none';
+    els.colorLabel.textContent = 'Color de ' + (p==='pantalon' ? 'pantalón' : p);
+    els.chalecoPeek.setAttribute('fill', '#F5F2ED');
+
+    show(els.gSaco, p === 'saco');
+    show(els.gChaleco, p === 'chaleco');
+    show(els.gPantalon, p === 'pantalon');
+    show(els.gFalda, p === 'falda');
+
+    document.querySelectorAll('#colorSwatch .swatch').forEach(s=>{
+      s.classList.toggle('active', s.dataset.c === fillFor(p));
+    });
+  }
+
+  els.genderSeg.addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#genderSeg button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    cfgState.gender = b.dataset.g;
+    cfgState.activePrenda = 'saco';
+    renderPrendaTabs();
+    renderFigure();
+  });
+
+  els.prendaTabs.addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    cfgState.activePrenda = b.dataset.p;
+    renderPrendaTabs();
+    renderFigure();
+  });
+
+  els.colorSwatch.addEventListener('click', e=>{
+    const sw = e.target.closest('.swatch'); if(!sw) return;
+    if(cfgState.activePrenda === 'resultado') return;
+    cfgState.colors[cfgState.activePrenda] = sw.dataset.c;
+    renderFigure();
+  });
+
+  renderPrendaTabs();
+  renderFigure();
 </script>
 
 </body>
