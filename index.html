@@ -317,9 +317,9 @@
           </g>
 
           <g id="g-saco">
-            <rect x="58" y="58" width="15" height="98" rx="7" fill="#15181D"/>
-            <rect x="127" y="58" width="15" height="98" rx="7" fill="#15181D"/>
-            <path d="M73,54 Q100,42 127,54 L136,148 Q100,164 64,148 Z" fill="#15181D" stroke="#000" stroke-width="1"/>
+            <rect class="saco-color" x="58" y="58" width="15" height="98" rx="7" fill="#15181D"/>
+            <rect class="saco-color" x="127" y="58" width="15" height="98" rx="7" fill="#15181D"/>
+            <path class="saco-color" d="M73,54 Q100,42 127,54 L136,148 Q100,164 64,148 Z" fill="#15181D" stroke="#000" stroke-width="1"/>
             <path d="M98,52 L86,98 L98,88 Z" fill="#0B0D10"/>
             <path d="M102,52 L114,98 L102,88 Z" fill="#0B0D10"/>
             <rect id="chalecoPeek" x="93" y="54" width="14" height="44" fill="#F5F2ED"/>
@@ -453,10 +453,7 @@
 
   function renderFigure(){
     // aplica colores actuales a cada capa
-    els.gSaco.querySelectorAll('rect, path').forEach(el => {
-      const f = el.getAttribute('fill');
-      if(f === '#15181D') el.setAttribute('fill', fillFor('saco'));
-    });
+    els.gSaco.querySelectorAll('.saco-color').forEach(el => el.setAttribute('fill', fillFor('saco')));
     els.gChaleco.querySelector('path').setAttribute('fill', fillFor('chaleco'));
     els.gPantalon.querySelectorAll('rect').forEach((r,i) => { if(i<2) r.setAttribute('fill', fillFor('pantalon')); });
     els.gFalda.querySelector('path').setAttribute('fill', fillFor('falda'));
